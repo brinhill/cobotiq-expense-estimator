@@ -1,6 +1,6 @@
 # Cobotiq Travel and Labor Estimator: Build Plan
 
-Status: Draft v2 (decisions from review round 1 applied)
+Status: Draft v3 (decisions from review rounds 1 and 2 applied)
 Reference: `expense-calculator-v4` (Catalyst Slate page, single `index.html`)
 
 ## 1. Goal
@@ -20,12 +20,16 @@ Embedding the calculator inside the Deal record UI is out of scope for now.
 | 4 | Presentation | Roll-up line item on the estimate (breakdown kept in the description and snapshot). |
 | 5 | Hotel pricing | Live, based on the trip dates. |
 | 6 | Commit author | `Cobotiq <noreply@cobotiq.com>` |
+| 7 | Overtime | Needed but not defined yet. Build an OT hours field and an editable OT rate (placeholder 1.5x), default 0 OT hours. |
+| 8 | Travel time | TBD. Interim rule: each travel day is billed at the 4 hour minimum at the labor rate. Editable. |
+| 9 | Technician origin | Technician is often unknown at estimate time. Origin is an editable field with a company default; picking a technician fills their home base, which can still be overridden. |
+| 10 | API cost | Prefer free or near free providers (see section 5). |
 
 ## 3. What v4 does today (baseline)
 
 | Area | v4 behavior | Plan |
 |------|-------------|------|
-| Airfare | Only live call (Catalyst `flight_search`, Amadeus); $450 fallback | Rebuild with a supported live provider |
+| Airfare | Only live call (Catalyst `flight_search`, Amadeus); $450 fallback. Amadeus Self-Service shut down July 17, 2026, so this no longer returns live data | Rebuild with a supported live provider |
 | Hotel | Hardcoded $107 / $156 / $212 per night | Live, date based hotel rates |
 | Car rental | Hardcoded $40 to $75 per day | Rate table (editable), live provider later if wanted |
 | Meals | Flat $68/day | GSA M&IE by location, 75% first and last day |
@@ -63,22 +67,34 @@ to real estimates.
 
 ## 5. Live data sources
 
-| Expense | Source (proposed) | Notes |
-|---------|-------------------|-------|
-| Airfare | SerpApi Google Flights (recommended) or Duffel | Amadeus Self-Service is reportedly being retired; confirm before relying on it |
-| Hotel | SerpApi Google Hotels (recommended) or LiteAPI | Live nightly rates for check-in and check-out dates near the job site. GSA lodging rate shown as a reference cap |
-| Meals | GSA Per Diem API (free, api.data.gov key) | M&IE by city/ZIP, 75% on travel days |
-| Driving | Google Maps Routes API x IRS mileage rate | Used when the site is within the drive threshold |
-| Car rental | Editable rate table in Catalyst | Live source can be added later |
-| Airports | Nearest airport lookup from origin and site | Removes manual IATA code entry |
+Amadeus Self-Service APIs were shut down on July 17, 2026. The replacements
+below are free or close to free at Cobotiq's expected volume. Each provider
+sits behind an adapter in the engine so it can be swapped without touching
+the calculator.
 
-Using SerpApi for both flights and hotels means one vendor, one key and one bill.
+| Expense | Recommended start | Free / low cost alternative | Notes |
+|---------|-------------------|-----------------------------|-------|
+| Airfare | SerpApi Google Flights (free plan, 250 searches/month shared) | Duffel (search is free up to 1500 searches per booking, then about $0.005 per search) | Duffel is booking oriented; confirm estimate only use fits their terms |
+| Hotel | SerpApi Google Hotels (same free plan) | LiteAPI (rate search endpoints free; sandbox key available) | Live nightly rates for the trip dates; GSA lodging shown as a reference cap |
+| Meals | GSA Per Diem API (free, api.data.gov key) | none needed | M&IE by city/ZIP, 75% on travel days |
+| Driving | Google Maps Routes API x IRS mileage rate | Google free monthly allowance | Used when the site is within the drive threshold |
+| Car rental | Editable rate table in Catalyst | none needed | Live source can be added later |
+| Airports | Static airport dataset (OurAirports, free) | none needed | Nearest airport to origin and site |
+
+Budget math for the free plan: one estimate uses about 2 live searches
+(1 flight, 1 hotel). With a 24 hour cache that is roughly 100 or more
+estimates per month on the SerpApi free plan. If the quota runs out, the
+engine falls back to GSA lodging and a flagged airfare estimate instead of
+failing, and the estimate is marked "not live". Upgrading (SerpApi paid, or
+switching to Duffel/LiteAPI) only becomes necessary if volume grows.
 
 ## 6. Inputs
 
 Trip
 - Deal (prefills customer, site address from the Deal/Account)
-- Origin (default: technician home base), departure and return dates
+- Origin: company default base, or a picked technician's home base; always editable
+- Technician (optional; often unassigned at estimate time)
+- Departure and return dates
 - Number of technicians, rooms (default one per technician)
 - Travel mode: auto (fly vs drive by distance), fly, or drive
 
@@ -88,7 +104,8 @@ Labor (all editable, defaults from a config table)
 - Hours per technician per day, number of work days
 - Onsite: billed hours per day = max(entered hours, 4)
 - Warehouse break/fix: billed hours = entered hours (no minimum)
-- Open items: overtime, travel time billing (see section 10)
+- Overtime: OT hours (default 0) x editable OT rate (placeholder 1.5x), rules TBD
+- Travel days (interim): billed at the 4 hour minimum x rate per technician, editable
 
 Adjustments
 - Expense markup %, contingency %, "Other" expense rows
@@ -101,7 +118,9 @@ Adjustments
 - Airfare = selected fare x technicians
 - Car = daily rate x rental days (shared, one car per N technicians, configurable)
 - Mileage = round trip miles x IRS rate (drive mode)
-- Labor = technicians x days x billed hours x rate
+- Labor = technicians x work days x billed hours x rate
+- Overtime = technicians x OT hours x OT rate
+- Travel time (interim) = technicians x travel days x 4 hours x rate
 - Totals rounded to cents; every figure stores its source and fetch time
 
 ## 8. Output to Books
@@ -128,7 +147,7 @@ Description: 2 techs, Richmond VA to Austin TX, Mar 1 to Mar 5 2026
 
 ## 9. Phases
 
-1. **Setup**: API keys (SerpApi or alternatives, GSA, Google), Books sandbox or
+1. **Setup**: API keys (SerpApi free plan, GSA, Google), Books sandbox or
    test customer, Books Item for the roll-up, Catalyst project confirmed.
 2. **Engine**: calculation module + unit tests, flights, hotels, GSA, mileage,
    caching, snapshots.
@@ -141,12 +160,11 @@ Description: 2 techs, Richmond VA to Austin TX, Mar 1 to Mar 5 2026
 
 ## 10. Open questions
 
-- Hotel/flight API budget: SerpApi plans start around $75/month. OK, or prefer another provider?
+- Provider choice: start on the SerpApi free plan, or go straight to Duffel + LiteAPI?
 - Labor inside the roll-up line, or labor as its own line and travel rolled up?
-- Overtime: is there an OT rate or rule, or is everything $150/hr?
-- Travel time: billed? If so, at what rate?
-- Does the 4 hour onsite minimum apply to travel days too?
-- Technician home base: one office location, or per technician?
+- Overtime rule and rate (placeholder until defined).
+- Travel time rule (interim: 4 hour minimum per travel day).
+- Company default origin (office address or city).
 - Books sandbox org available, or test against a test customer in production?
 
 ## 11. Proposed repo layout
