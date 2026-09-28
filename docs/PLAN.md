@@ -1,6 +1,6 @@
 # Cobotiq Travel and Labor Estimator: Build Plan
 
-Status: Draft v3 (decisions from review rounds 1 and 2 applied)
+Status: Draft v4 (decisions from review rounds 1 to 3 applied)
 Reference: `expense-calculator-v4` (Catalyst Slate page, single `index.html`)
 
 ## 1. Goal
@@ -23,7 +23,8 @@ Embedding the calculator inside the Deal record UI is out of scope for now.
 | 7 | Overtime | Needed but not defined yet. Build an OT hours field and an editable OT rate (placeholder 1.5x), default 0 OT hours. |
 | 8 | Travel time | TBD. Interim rule: each travel day is billed at the 4 hour minimum at the labor rate. Editable. |
 | 9 | Technician origin | Technician is often unknown at estimate time. Origin is an editable field with a company default; picking a technician fills their home base, which can still be overridden. |
-| 10 | API cost | Prefer free or near free providers (see section 5). |
+| 10 | API cost | Start on the SerpApi free plan (all in one, one key). Expected volume is 20 to 50 estimates per month. Later, go through the key process for cheaper or more capable providers (Duffel, LiteAPI) via the adapter layer. |
+| 11 | Car rental | National Car Rental only, at Cobotiq corporate rates. |
 
 ## 3. What v4 does today (baseline)
 
@@ -31,7 +32,7 @@ Embedding the calculator inside the Deal record UI is out of scope for now.
 |------|-------------|------|
 | Airfare | Only live call (Catalyst `flight_search`, Amadeus); $450 fallback. Amadeus Self-Service shut down July 17, 2026, so this no longer returns live data | Rebuild with a supported live provider |
 | Hotel | Hardcoded $107 / $156 / $212 per night | Live, date based hotel rates |
-| Car rental | Hardcoded $40 to $75 per day | Rate table (editable), live provider later if wanted |
+| Car rental | Hardcoded $40 to $75 per day | National corporate rate sheet (editable), with taxes and fees |
 | Meals | Flat $68/day | GSA M&IE by location, 75% first and last day |
 | Labor | Hours x rate, typed manually | Service type rules, minimums, editable defaults |
 | Save / Report / CSV | Placeholder alerts | Add to Books estimate, PDF/CSV summary |
@@ -78,7 +79,7 @@ the calculator.
 | Hotel | SerpApi Google Hotels (same free plan) | LiteAPI (rate search endpoints free; sandbox key available) | Live nightly rates for the trip dates; GSA lodging shown as a reference cap |
 | Meals | GSA Per Diem API (free, api.data.gov key) | none needed | M&IE by city/ZIP, 75% on travel days |
 | Driving | Google Maps Routes API x IRS mileage rate | Google free monthly allowance | Used when the site is within the drive threshold |
-| Car rental | Editable rate table in Catalyst | none needed | Live source can be added later |
+| Car rental | National corporate rate sheet in Catalyst (see 5.1) | none needed | No public API returns corporate contract rates |
 | Airports | Static airport dataset (OurAirports, free) | none needed | Nearest airport to origin and site |
 
 Budget math for the free plan: one estimate uses about 2 live searches
@@ -87,6 +88,24 @@ estimates per month on the SerpApi free plan. If the quota runs out, the
 engine falls back to GSA lodging and a flagged airfare estimate instead of
 failing, and the estimate is marked "not live". Upgrading (SerpApi paid, or
 switching to Duffel/LiteAPI) only becomes necessary if volume grows.
+
+### 5.1 Car rental: National corporate rates
+
+National (Enterprise Holdings) has no public or self serve API. Public price
+searches would show retail prices, not Cobotiq's contract rates, so a live
+API is the wrong source here. The engine uses a rate sheet instead:
+
+- Table `car_rates`: car class (for example Midsize, Full size, SUV), daily
+  rate, weekly rate, optional region or airport override, effective date.
+- Table `car_fees`: estimated taxes and airport fees as a percent, by airport,
+  with a default (for example 25%) until real receipts refine it.
+- Rental days = return date minus pickup date (minimum 1); weekly rate used
+  when cheaper.
+- One car per N technicians (default 2 to 3, editable).
+- Fuel: optional estimate from route miles, or a flat allowance.
+- The rate sheet is edited in one place when the National contract changes.
+- Future: if Cobotiq gets partner access (through Enterprise Holdings or a
+  travel management company), a live adapter can replace the table.
 
 ## 6. Inputs
 
@@ -160,12 +179,13 @@ Description: 2 techs, Richmond VA to Austin TX, Mar 1 to Mar 5 2026
 
 ## 10. Open questions
 
-- Provider choice: start on the SerpApi free plan, or go straight to Duffel + LiteAPI?
 - Labor inside the roll-up line, or labor as its own line and travel rolled up?
 - Overtime rule and rate (placeholder until defined).
-- Travel time rule (interim: 4 hour minimum per travel day).
+- Travel time rule (interim: 4 hour minimum per travel day, $600 per tech per day at $150/hr).
 - Company default origin (office address or city).
 - Books sandbox org available, or test against a test customer in production?
+- National: corporate rate sheet (car classes and rates), default car class,
+  and whether fuel is estimated or left out.
 
 ## 11. Proposed repo layout
 
