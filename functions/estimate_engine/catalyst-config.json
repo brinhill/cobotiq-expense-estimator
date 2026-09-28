@@ -1,0 +1,11 @@
+{
+  "deployment": {
+    "name": "estimate_engine",
+    "stack": "node20",
+    "type": "advancedio",
+    "env_variables": {}
+  },
+  "execution": {
+    "main": "index.js"
+  }
+}

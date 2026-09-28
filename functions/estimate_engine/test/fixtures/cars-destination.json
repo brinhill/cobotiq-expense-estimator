@@ -1,0 +1,7 @@
+{
+  "status": true,
+  "message": "Success",
+  "data": [
+    { "name": "Austin-Bergstrom International Airport", "type": "airport", "iata_code": "AUS", "coordinates": { "latitude": 30.1945, "longitude": -97.6699 } }
+  ]
+}

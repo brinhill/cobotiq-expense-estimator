@@ -1,0 +1,10 @@
+{
+  "properties": [
+    { "name": "Budget Inn", "overall_rating": 2.9, "extracted_hotel_class": 2, "rate_per_night": { "lowest": "$79", "extracted_lowest": 79 } },
+    { "name": "Hampton Inn Downtown", "overall_rating": 4.3, "extracted_hotel_class": 3, "rate_per_night": { "lowest": "$189", "extracted_lowest": 189 } },
+    { "name": "Courtyard Austin", "overall_rating": 4.1, "extracted_hotel_class": 3, "rate_per_night": { "lowest": "$171", "extracted_lowest": 171 } },
+    { "name": "Holiday Inn Express", "overall_rating": 3.9, "extracted_hotel_class": 2, "rate_per_night": { "lowest": "$158", "extracted_lowest": 158 } },
+    { "name": "Four Seasons", "overall_rating": 4.8, "extracted_hotel_class": 5, "rate_per_night": { "lowest": "$689", "extracted_lowest": 689 } },
+    { "name": "No Price Suites", "overall_rating": 4.0 }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "request": null,
+  "errors": [],
+  "rates": [
+    {
+      "oconus": false,
+      "state": "TX",
+      "year": 2026,
+      "isOconus": "false",
+      "rate": [
+        {
+          "city": "Austin",
+          "county": "Travis",
+          "standardRate": "false",
+          "meals": 74,
+          "zip": null,
+          "months": { "month": [
+            { "value": 163, "number": 1, "short": "Jan", "long": "January" },
+            { "value": 163, "number": 2, "short": "Feb", "long": "February" },
+            { "value": 197, "number": 3, "short": "Mar", "long": "March" },
+            { "value": 163, "number": 4, "short": "Apr", "long": "April" },
+            { "value": 163, "number": 5, "short": "May", "long": "May" },
+            { "value": 163, "number": 6, "short": "Jun", "long": "June" },
+            { "value": 163, "number": 7, "short": "Jul", "long": "July" },
+            { "value": 163, "number": 8, "short": "Aug", "long": "August" },
+            { "value": 163, "number": 9, "short": "Sep", "long": "September" },
+            { "value": 163, "number": 10, "short": "Oct", "long": "October" },
+            { "value": 163, "number": 11, "short": "Nov", "long": "November" },
+            { "value": 163, "number": 12, "short": "Dec", "long": "December" }
+          ] }
+        }
+      ]
+    }
+  ]
+}

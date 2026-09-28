@@ -1,0 +1,31 @@
+{
+  "search_metadata": { "status": "Success" },
+  "best_flights": [
+    {
+      "flights": [
+        { "airline": "American", "departure_airport": { "id": "RIC" }, "arrival_airport": { "id": "CLT" } },
+        { "airline": "American", "departure_airport": { "id": "CLT" }, "arrival_airport": { "id": "AUS" } }
+      ],
+      "total_duration": 330,
+      "price": 548
+    },
+    {
+      "flights": [
+        { "airline": "Delta", "departure_airport": { "id": "RIC" }, "arrival_airport": { "id": "ATL" } },
+        { "airline": "Delta", "departure_airport": { "id": "ATL" }, "arrival_airport": { "id": "AUS" } }
+      ],
+      "total_duration": 315,
+      "price": 512
+    }
+  ],
+  "other_flights": [
+    {
+      "flights": [
+        { "airline": "Spirit" }, { "airline": "Spirit" }, { "airline": "Spirit" }
+      ],
+      "total_duration": 720,
+      "price": 289
+    },
+    { "flights": [{ "airline": "United" }], "total_duration": 400 }
+  ]
+}

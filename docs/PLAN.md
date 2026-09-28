@@ -1,6 +1,6 @@
 # Cobotiq Travel and Labor Estimator: Build Plan
 
-Status: Draft v5 (decisions from review rounds 1 to 4 applied)
+Status: v6. Phase 2 (engine) built; see `functions/estimate_engine/README.md`
 Reference: `expense-calculator-v4` (Catalyst Slate page, single `index.html`)
 
 ## 1. Goal
@@ -25,6 +25,8 @@ Embedding the calculator inside the Deal record UI is out of scope for now.
 | 9 | Technician origin | Technician is often unknown at estimate time. Origin is an editable field with a company default; picking a technician fills their home base, which can still be overridden. |
 | 10 | API cost | Start on the SerpApi free plan (all in one, one key). Expected volume is 20 to 50 estimates per month. Later, go through the key process for cheaper or more capable providers (Duffel, LiteAPI) via the adapter layer. |
 | 11 | Car rental | Live, market based prices from any vendor (National requirement dropped). Prices surge by market and date, so a static table is not acceptable. |
+| 12 | Car defaults | Midsize class by default. Fuel estimated at $30 per car per day, editable. |
+| 13 | Providers | SerpApi (flights, hotels) and RapidAPI `booking-com15` (cars) accounts created. |
 
 ## 3. What v4 does today (baseline)
 
@@ -191,11 +193,20 @@ Description: 2 techs, Richmond VA to Austin TX, Mar 1 to Mar 5 2026
 - Books sandbox org available, or test against a test customer in production?
 - Default car class (proposed: Midsize) and whether fuel is estimated or left out.
 
-## 11. Proposed repo layout
+## 11. Repo layout
 
 ```
-functions/estimate-engine/   Catalyst Advanced I/O function (API)
-functions/shared/calc/       pricing and labor rules + tests
-client/                      calculator UI (Catalyst web client)
-docs/                        plan, setup, SOP source
+functions/estimate_engine/          Catalyst Advanced I/O function (phase 2, built)
+  index.js                          HTTP entry: /health, /estimate/calculate
+  src/calc/                         pure rules: validation, labor, expenses, roll-up
+  src/providers/                    SerpApi flights and hotels, RapidAPI cars, GSA
+  src/pricing.js                    cache, stale and fallback handling
+  src/store/                        Catalyst Data Store and in-memory stores
+  test/                             unit tests with provider fixtures (npm test)
+  scripts/smoke.js                  live check with real keys (npm run smoke)
+client/                             calculator UI (phase 3)
+docs/                               plan, SOP source
 ```
+
+The shared calculation code lives inside the function folder, because each
+Catalyst function deploys as its own package.

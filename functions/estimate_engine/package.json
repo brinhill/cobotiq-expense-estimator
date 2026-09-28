@@ -1,0 +1,17 @@
+{
+  "name": "estimate_engine",
+  "version": "0.1.0",
+  "description": "Cobotiq travel and labor estimate engine (Catalyst Advanced I/O function)",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "smoke": "node scripts/smoke.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "zcatalyst-sdk-node": "^3.4.0"
+  }
+}

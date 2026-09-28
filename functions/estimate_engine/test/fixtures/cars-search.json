@@ -1,0 +1,13 @@
+{
+  "status": true,
+  "message": "Success",
+  "data": {
+    "search_results": [
+      { "vehicle_info": { "v_name": "Nissan Versa", "group": "Economy" }, "supplier_info": { "name": "Budget" }, "pricing_info": { "price": 176.4, "currency": "USD" } },
+      { "vehicle_info": { "v_name": "Toyota Corolla", "group": "Intermediate" }, "supplier_info": { "name": "Enterprise" }, "pricing_info": { "price": 231.9, "drive_away_price": 243.12, "currency": "USD" } },
+      { "vehicle_info": { "v_name": "VW Jetta", "group": "Intermediate" }, "supplier_info": { "name": "National" }, "pricing_info": { "price": 262.0, "currency": "USD" } },
+      { "vehicle_info": { "v_name": "Chevy Tahoe", "group": "Full-size SUV" }, "supplier_info": { "name": "Hertz" }, "pricing_info": { "price": 611.0, "currency": "USD" } },
+      { "vehicle_info": { "v_name": "Euro Car", "group": "Intermediate" }, "supplier_info": { "name": "Sixt" }, "pricing_info": { "price": 150.0, "currency": "EUR" } }
+    ]
+  }
+}
